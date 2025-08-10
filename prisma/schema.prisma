@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  FOUNDER
+  CO_FOUNDER
+  CORE_DEVELOPER
+  UI_UX_DESIGNER
+  GROUP_SUPPORT
+  MAINTAINER
+}
+
+enum DeviceStatus {
+  ACTIVE
+  DISCONTINUED
+}
+
+enum BuildType {
+  GAPPS
+  VANILLA
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  password     String
+  name         String
+  profileImage String?
+  role         UserRole
+  isActive     Boolean   @default(true)
+  socialLinks  Json?     // Array of { platform: string, url: string }
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  maintainedDevices Device[]
+
+  @@map("users")
+}
+
+model Device {
+  id               String       @id @default(cuid())
+  name             String
+  codename         String       @unique
+  image            String?
+  status           DeviceStatus @default(ACTIVE)
+  flashInstruction String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  // Relations
+  maintainerId String
+  maintainer   User        @relation(fields: [maintainerId], references: [id])
+  builds       BuildRelease[]
+
+  @@map("devices")
+}
+
+model SourceRelease {
+  id              String   @id @default(cuid())
+  version         String   @unique
+  codenameVersion String
+  banner          String?
+  releaseDate     DateTime
+  description     String?
+  changelog       Json?    // Array of strings
+  screenshots     Json?    // Array of screenshot URLs
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("source_releases")
+}
+
+model BuildRelease {
+  id        String    @id @default(cuid())
+  type      BuildType
+  downloadUrl String
+  version   String
+  fileSize  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("build_releases")
+}
