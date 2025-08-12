@@ -5,14 +5,17 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
+    "start:prod": "node dist/index.js",
     "dev": "bun --watch run index.ts",
-    "build": "bun build index.ts --outdir ./dist --target node",
+    "build": "prisma generate && bun build index.ts --outdir ./dist --target node",
+    "build:prod": "npm run db:deploy && npm run build",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:reset": "prisma migrate reset",
     "db:seed": "bun run prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "@types/bun": "latest",

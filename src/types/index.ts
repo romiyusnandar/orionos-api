@@ -85,3 +85,11 @@ export interface ApiResponse<T = any> {
   data?: T;
   errors?: string[];
 }
+
+export interface CreateUiSampleRequest {
+  url: string;
+}
+
+export interface UpdateUiSampleRequest {
+  url?: string;
+}

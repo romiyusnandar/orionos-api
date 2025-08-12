@@ -4,6 +4,7 @@ import userRoutes from './user.routes';
 import deviceRoutes from './device.routes';
 import sourceReleaseRoutes from './source-release.routes';
 import buildReleaseRoutes from './build-release.routes';
+import uiSampleRoutes from './ui-sample.routes';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/users', userRoutes);
 router.use('/devices', deviceRoutes);
 router.use('/sources', sourceReleaseRoutes);
 router.use('/builds', buildReleaseRoutes);
+router.use('/ui-samples', uiSampleRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

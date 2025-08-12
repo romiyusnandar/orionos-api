@@ -96,3 +96,12 @@ model BuildRelease {
 
   @@map("build_releases")
 }
+
+model UiSample {
+  id        String   @id @default(cuid())
+  url       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ui_samples")
+}
