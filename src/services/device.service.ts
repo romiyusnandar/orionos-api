@@ -24,6 +24,7 @@ export class DeviceService {
             downloadUrl: true,
             version: true,
             fileSize: true,
+            changelogUrl: true,
             createdAt: true
           },
           orderBy: { createdAt: 'desc' }
@@ -53,6 +54,7 @@ export class DeviceService {
             downloadUrl: true,
             version: true,
             fileSize: true,
+            changelogUrl: true,
             createdAt: true
           },
           orderBy: { createdAt: 'desc' }
@@ -87,6 +89,7 @@ export class DeviceService {
             downloadUrl: true,
             version: true,
             fileSize: true,
+            changelogUrl: true,
             createdAt: true
           },
           orderBy: { createdAt: 'desc' }
@@ -124,6 +127,7 @@ export class DeviceService {
             id: true,
             type: true,
             downloadUrl: true,
+            changelogUrl: true,
             version: true,
             fileSize: true,
             createdAt: true
@@ -213,6 +217,7 @@ export class DeviceService {
             id: true,
             type: true,
             downloadUrl: true,
+            changelogUrl: true,
             version: true,
             fileSize: true,
             createdAt: true

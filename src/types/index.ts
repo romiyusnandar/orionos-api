@@ -65,6 +65,7 @@ export interface CreateBuildReleaseRequest {
   downloadUrl: string;
   version: string;
   fileSize?: string;
+  changelogUrl?: string;
   deviceId: string;
 }
 

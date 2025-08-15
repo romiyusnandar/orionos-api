@@ -87,6 +87,7 @@ model BuildRelease {
   downloadUrl String
   version   String
   fileSize  String?
+  changelogUrl String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
