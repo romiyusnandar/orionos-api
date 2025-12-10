@@ -7,28 +7,11 @@ import type {
 export class DeviceService {
   async getAllDevices() {
     return await prisma.device.findMany({
-      include: {
-        maintainer: {
-          select: {
-            id: true,
-            name: true,
-            profileImage: true,
-            role: true,
-            socialLinks: true
-          }
-        },
-        builds: {
-          select: {
-            id: true,
-            type: true,
-            downloadUrl: true,
-            version: true,
-            fileSize: true,
-            changelogUrl: true,
-            createdAt: true
-          },
-          orderBy: { createdAt: 'desc' }
-        }
+      select: {
+        name: true,
+        codename: true,
+        image: true,
+        status: true
       },
       orderBy: { name: 'asc' }
     });
