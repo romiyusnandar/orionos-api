@@ -5,18 +5,40 @@ import type { ApiResponse, CreateBuildReleaseRequest } from '../types';
 const buildReleaseService = new BuildReleaseService();
 
 export class BuildReleaseController {
+  async getAllBuilds(req: Request, res: Response): Promise<void> {
+    try {
+      const builds = await buildReleaseService.getAllBuilds();
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'All build releases retrieved successfully',
+        data: builds
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      const response: ApiResponse = {
+        success: false,
+        message: error.message || 'Failed to get build releases',
+        errors: [error.message]
+      };
+
+      res.status(500).json(response);
+    }
+  }
+
   async getBuildsByDevice(req: Request, res: Response): Promise<void> {
     try {
-      const { deviceId } = req.params;
-      if (!deviceId) {
+      const { codename } = req.params;
+      if (!codename) {
         res.status(400).json({
           success: false,
-          message: 'Device ID is required'
+          message: 'Device codename is required'
         });
         return;
       }
 
-      const builds = await buildReleaseService.getBuildsByDevice(deviceId);
+      const builds = await buildReleaseService.getBuildsByDevice(codename);
 
       const response: ApiResponse = {
         success: true,
@@ -32,7 +54,7 @@ export class BuildReleaseController {
         errors: [error.message]
       };
 
-      res.status(500).json(response);
+      res.status(404).json(response);
     }
   }
 

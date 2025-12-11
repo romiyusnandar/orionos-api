@@ -6,9 +6,10 @@ const router = Router();
 const buildReleaseController = new BuildReleaseController();
 
 // Public routes
+router.get('/', (req, res) => buildReleaseController.getAllBuilds(req, res));
 router.get('/latest', (req, res) => buildReleaseController.getLatestBuilds(req, res));
 router.get('/version/:version', (req, res) => buildReleaseController.getBuildsByVersion(req, res));
-router.get('/device/:deviceId', (req, res) => buildReleaseController.getBuildsByDevice(req, res));
+router.get('/device/:codename', (req, res) => buildReleaseController.getBuildsByDevice(req, res));
 router.get('/:id', (req, res) => buildReleaseController.getBuildById(req, res));
 
 // Protected routes (Admin only)
