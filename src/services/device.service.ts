@@ -12,7 +12,9 @@ export class DeviceService {
         name: true,
         codename: true,
         image: true,
-        status: true
+        status: true,
+        createdAt: true,
+        updatedAt: true
       },
       orderBy: { name: 'asc' }
     });
