@@ -8,6 +8,7 @@ export class DeviceService {
   async getAllDevices() {
     return await prisma.device.findMany({
       select: {
+        id: true,
         name: true,
         codename: true,
         image: true,
