@@ -14,7 +14,15 @@ export class DeviceService {
         image: true,
         status: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        maintainerId: true,
+        maintainer: {
+          select: {
+            id: true,
+            name: true,
+            role: true
+          }
+        }
       },
       orderBy: { name: 'asc' }
     });
