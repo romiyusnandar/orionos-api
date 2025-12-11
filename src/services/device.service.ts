@@ -13,6 +13,7 @@ export class DeviceService {
         codename: true,
         image: true,
         status: true,
+        flashInstruction: true,
         createdAt: true,
         updatedAt: true,
         maintainerId: true,
