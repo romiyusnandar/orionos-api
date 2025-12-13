@@ -36,6 +36,43 @@ export class AnnouncementService {
         });
     }
 
+    // Get announcements for devices maintained by specific user
+    async getMyAnnouncements(userId: string) {
+        return await prisma.announcement.findMany({
+            where: {
+                device: {
+                    maintainerId: userId
+                }
+            },
+            include: {
+                developer: {
+                    select: {
+                        id: true,
+                        name: true,
+                        profileImage: true,
+                        role: true
+                    }
+                },
+                sourceRelease: {
+                    select: {
+                        id: true,
+                        version: true,
+                        codenameVersion: true
+                    }
+                },
+                device: {
+                    select: {
+                        id: true,
+                        name: true,
+                        codename: true,
+                        image: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+    }
+
     async getAnnouncementById(id: string) {
         const announcement = await prisma.announcement.findUnique({
             where: { id },
@@ -152,7 +189,7 @@ export class AnnouncementService {
         });
     }
 
-    async createAnnouncement(data: CreateAnnouncementRequest) {
+    async createAnnouncement(data: CreateAnnouncementRequest, userId?: string, userRole?: string) {
         // Verify developer exists
         const developer = await prisma.user.findUnique({
             where: { id: data.developerId }
@@ -178,6 +215,14 @@ export class AnnouncementService {
 
         if (!device) {
             throw new Error('Device not found');
+        }
+
+        // Check ownership for non-admin users
+        const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+        if (userId && !adminRoles.includes(userRole || '')) {
+            if (device.maintainerId !== userId) {
+                throw new Error('You can only create announcements for devices you maintain');
+            }
         }
 
         return await prisma.announcement.create({
@@ -210,14 +255,25 @@ export class AnnouncementService {
         });
     }
 
-    async updateAnnouncement(id: string, data: UpdateAnnouncementRequest) {
+    async updateAnnouncement(id: string, data: UpdateAnnouncementRequest, userId?: string, userRole?: string) {
         // Check if announcement exists
         const existingAnnouncement = await prisma.announcement.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                device: true
+            }
         });
 
         if (!existingAnnouncement) {
             throw new Error('Announcement not found');
+        }
+
+        // Check ownership for non-admin users
+        const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+        if (userId && !adminRoles.includes(userRole || '')) {
+            if (existingAnnouncement.device.maintainerId !== userId) {
+                throw new Error('You can only update announcements for devices you maintain');
+            }
         }
 
         // Verify developer if being updated
@@ -250,6 +306,13 @@ export class AnnouncementService {
 
             if (!device) {
                 throw new Error('Device not found');
+            }
+
+            // Check ownership for new device
+            if (userId && !adminRoles.includes(userRole || '')) {
+                if (device.maintainerId !== userId) {
+                    throw new Error('You can only update announcements for devices you maintain');
+                }
             }
         }
 
@@ -284,14 +347,25 @@ export class AnnouncementService {
         });
     }
 
-    async deleteAnnouncement(id: string) {
+    async deleteAnnouncement(id: string, userId?: string, userRole?: string) {
         // Check if announcement exists
         const existingAnnouncement = await prisma.announcement.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                device: true
+            }
         });
 
         if (!existingAnnouncement) {
             throw new Error('Announcement not found');
+        }
+
+        // Check ownership for non-admin users
+        const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+        if (userId && !adminRoles.includes(userRole || '')) {
+            if (existingAnnouncement.device.maintainerId !== userId) {
+                throw new Error('You can only delete announcements for devices you maintain');
+            }
         }
 
         return await prisma.announcement.delete({

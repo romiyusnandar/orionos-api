@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { BuildReleaseController } from '../controllers/build-release.controller';
-import { authenticate, requireAdmin } from '../middleware/auth';
+import { authenticate, requireAdmin, requireAdminOrOwner } from '../middleware/auth';
 
 const router = Router();
 const buildReleaseController = new BuildReleaseController();
@@ -12,12 +12,12 @@ router.get('/version/:version', (req, res) => buildReleaseController.getBuildsBy
 router.get('/device/:codename', (req, res) => buildReleaseController.getBuildsByDevice(req, res));
 router.get('/:id', (req, res) => buildReleaseController.getBuildById(req, res));
 
-// Protected routes (Admin only)
-router.use(authenticate);
-router.use(requireAdmin);
+// Protected routes - Get my builds (authenticated users)
+router.get('/my/builds', authenticate, (req, res) => buildReleaseController.getMyBuilds(req, res));
 
-router.post('/', (req, res) => buildReleaseController.createBuild(req, res));
-router.put('/:id', (req, res) => buildReleaseController.updateBuild(req, res));
-router.delete('/:id', (req, res) => buildReleaseController.deleteBuild(req, res));
+// Protected routes - Admin or Owner
+router.post('/', authenticate, requireAdminOrOwner, (req, res) => buildReleaseController.createBuild(req, res));
+router.put('/:id', authenticate, requireAdminOrOwner, (req, res) => buildReleaseController.updateBuild(req, res));
+router.delete('/:id', authenticate, requireAdminOrOwner, (req, res) => buildReleaseController.deleteBuild(req, res));
 
 export default router;

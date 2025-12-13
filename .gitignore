@@ -35,3 +35,5 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 /generated/prisma
 SETUP_GUIDE.md
+prisma/SEED_USER_README.md
+prisma/seed-user.ts

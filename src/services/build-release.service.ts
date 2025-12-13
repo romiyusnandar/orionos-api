@@ -28,6 +28,37 @@ export class BuildReleaseService {
     });
   }
 
+  // Get builds for devices maintained by specific user
+  async getMyBuilds(userId: string) {
+    return await prisma.buildRelease.findMany({
+      where: {
+        device: {
+          maintainerId: userId
+        }
+      },
+      select: {
+        id: true,
+        type: true,
+        downloadUrl: true,
+        version: true,
+        fileSize: true,
+        changelogUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        deviceId: true,
+        device: {
+          select: {
+            id: true,
+            name: true,
+            codename: true,
+            image: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
   async getBuildsByDevice(codename: string) {
     // First, find the device by codename
     const device = await prisma.device.findUnique({
@@ -90,7 +121,7 @@ export class BuildReleaseService {
     return build;
   }
 
-  async createBuild(data: CreateBuildReleaseRequest) {
+  async createBuild(data: CreateBuildReleaseRequest, userId?: string, userRole?: string) {
     // Verify device exists
     const device = await prisma.device.findUnique({
       where: { id: data.deviceId }
@@ -98,6 +129,14 @@ export class BuildReleaseService {
 
     if (!device) {
       throw new Error('Device not found');
+    }
+
+    // Check ownership for non-admin users
+    const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+    if (userId && !adminRoles.includes(userRole || '')) {
+      if (device.maintainerId !== userId) {
+        throw new Error('You can only create builds for devices you maintain');
+      }
     }
 
     return await prisma.buildRelease.create({
@@ -114,14 +153,25 @@ export class BuildReleaseService {
     });
   }
 
-  async updateBuild(id: string, data: Partial<CreateBuildReleaseRequest>) {
+  async updateBuild(id: string, data: Partial<CreateBuildReleaseRequest>, userId?: string, userRole?: string) {
     // Check if build exists
     const existingBuild = await prisma.buildRelease.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        device: true
+      }
     });
 
     if (!existingBuild) {
       throw new Error('Build release not found');
+    }
+
+    // Check ownership for non-admin users
+    const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+    if (userId && !adminRoles.includes(userRole || '')) {
+      if (existingBuild.device.maintainerId !== userId) {
+        throw new Error('You can only update builds for devices you maintain');
+      }
     }
 
     // Verify device exists if deviceId is being updated
@@ -132,6 +182,13 @@ export class BuildReleaseService {
 
       if (!device) {
         throw new Error('Device not found');
+      }
+
+      // Check ownership for new device
+      if (userId && !adminRoles.includes(userRole || '')) {
+        if (device.maintainerId !== userId) {
+          throw new Error('You can only update builds for devices you maintain');
+        }
       }
     }
 
@@ -150,14 +207,25 @@ export class BuildReleaseService {
     });
   }
 
-  async deleteBuild(id: string) {
+  async deleteBuild(id: string, userId?: string, userRole?: string) {
     // Check if build exists
     const existingBuild = await prisma.buildRelease.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        device: true
+      }
     });
 
     if (!existingBuild) {
       throw new Error('Build release not found');
+    }
+
+    // Check ownership for non-admin users
+    const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+    if (userId && !adminRoles.includes(userRole || '')) {
+      if (existingBuild.device.maintainerId !== userId) {
+        throw new Error('You can only delete builds for devices you maintain');
+      }
     }
 
     return await prisma.buildRelease.delete({

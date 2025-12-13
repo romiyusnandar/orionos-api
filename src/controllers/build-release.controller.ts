@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { BuildReleaseService } from '../services/build-release.service';
 import type { ApiResponse, CreateBuildReleaseRequest } from '../types';
+import type { AuthenticatedRequest } from '../middleware/auth';
 
 const buildReleaseService = new BuildReleaseService();
 
@@ -20,6 +21,37 @@ export class BuildReleaseController {
       const response: ApiResponse = {
         success: false,
         message: error.message || 'Failed to get build releases',
+        errors: [error.message]
+      };
+
+      res.status(500).json(response);
+    }
+  }
+
+  async getMyBuilds(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+        return;
+      }
+
+      const builds = await buildReleaseService.getMyBuilds(userId);
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'My build releases retrieved successfully',
+        data: builds
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      const response: ApiResponse = {
+        success: false,
+        message: error.message || 'Failed to get my build releases',
         errors: [error.message]
       };
 
@@ -89,10 +121,10 @@ export class BuildReleaseController {
     }
   }
 
-  async createBuild(req: Request, res: Response): Promise<void> {
+  async createBuild(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const data: CreateBuildReleaseRequest = req.body;
-      const build = await buildReleaseService.createBuild(data);
+      const build = await buildReleaseService.createBuild(data, req.user?.userId, req.user?.role);
 
       const response: ApiResponse = {
         success: true,
@@ -112,7 +144,7 @@ export class BuildReleaseController {
     }
   }
 
-  async updateBuild(req: Request, res: Response): Promise<void> {
+  async updateBuild(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -124,7 +156,7 @@ export class BuildReleaseController {
       }
 
       const data: Partial<CreateBuildReleaseRequest> = req.body;
-      const build = await buildReleaseService.updateBuild(id, data);
+      const build = await buildReleaseService.updateBuild(id, data, req.user?.userId, req.user?.role);
 
       const response: ApiResponse = {
         success: true,
@@ -144,7 +176,7 @@ export class BuildReleaseController {
     }
   }
 
-  async deleteBuild(req: Request, res: Response): Promise<void> {
+  async deleteBuild(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -155,7 +187,7 @@ export class BuildReleaseController {
         return;
       }
 
-      await buildReleaseService.deleteBuild(id);
+      await buildReleaseService.deleteBuild(id, req.user?.userId, req.user?.role);
 
       const response: ApiResponse = {
         success: true,

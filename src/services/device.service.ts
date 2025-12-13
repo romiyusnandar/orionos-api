@@ -29,6 +29,34 @@ export class DeviceService {
     });
   }
 
+  // Get devices maintained by specific user
+  async getMyDevices(userId: string) {
+    return await prisma.device.findMany({
+      where: {
+        maintainerId: userId
+      },
+      select: {
+        id: true,
+        name: true,
+        codename: true,
+        image: true,
+        status: true,
+        flashInstruction: true,
+        createdAt: true,
+        updatedAt: true,
+        maintainerId: true,
+        maintainer: {
+          select: {
+            id: true,
+            name: true,
+            role: true
+          }
+        }
+      },
+      orderBy: { name: 'asc' }
+    });
+  }
+
   async getDeviceById(id: string) {
     const device = await prisma.device.findUnique({
       where: { id },

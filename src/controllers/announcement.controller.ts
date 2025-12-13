@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { AnnouncementService } from '../services/announcement.service';
 import type { ApiResponse, CreateAnnouncementRequest, UpdateAnnouncementRequest } from '../types';
+import type { AuthenticatedRequest } from '../middleware/auth';
 
 const announcementService = new AnnouncementService();
 
@@ -20,6 +21,37 @@ export class AnnouncementController {
             const response: ApiResponse = {
                 success: false,
                 message: error.message || 'Failed to get announcements',
+                errors: [error.message]
+            };
+
+            res.status(500).json(response);
+        }
+    }
+
+    async getMyAnnouncements(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const userId = req.user?.userId;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'User not authenticated'
+                });
+                return;
+            }
+
+            const announcements = await announcementService.getMyAnnouncements(userId);
+
+            const response: ApiResponse = {
+                success: true,
+                message: 'My announcements retrieved successfully',
+                data: announcements
+            };
+
+            res.status(200).json(response);
+        } catch (error: any) {
+            const response: ApiResponse = {
+                success: false,
+                message: error.message || 'Failed to get my announcements',
                 errors: [error.message]
             };
 
@@ -112,10 +144,10 @@ export class AnnouncementController {
         }
     }
 
-    async createAnnouncement(req: Request, res: Response): Promise<void> {
+    async createAnnouncement(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const data: CreateAnnouncementRequest = req.body;
-            const announcement = await announcementService.createAnnouncement(data);
+            const announcement = await announcementService.createAnnouncement(data, req.user?.userId, req.user?.role);
 
             const response: ApiResponse = {
                 success: true,
@@ -135,7 +167,7 @@ export class AnnouncementController {
         }
     }
 
-    async updateAnnouncement(req: Request, res: Response): Promise<void> {
+    async updateAnnouncement(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             if (!id) {
@@ -147,7 +179,7 @@ export class AnnouncementController {
             }
 
             const data: UpdateAnnouncementRequest = req.body;
-            const announcement = await announcementService.updateAnnouncement(id, data);
+            const announcement = await announcementService.updateAnnouncement(id, data, req.user?.userId, req.user?.role);
 
             const response: ApiResponse = {
                 success: true,
@@ -167,7 +199,7 @@ export class AnnouncementController {
         }
     }
 
-    async deleteAnnouncement(req: Request, res: Response): Promise<void> {
+    async deleteAnnouncement(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const { id } = req.params;
             if (!id) {
@@ -178,7 +210,7 @@ export class AnnouncementController {
                 return;
             }
 
-            await announcementService.deleteAnnouncement(id);
+            await announcementService.deleteAnnouncement(id, req.user?.userId, req.user?.role);
 
             const response: ApiResponse = {
                 success: true,

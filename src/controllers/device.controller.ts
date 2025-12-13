@@ -28,6 +28,37 @@ export class DeviceController {
     }
   }
 
+  async getMyDevices(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
+        });
+        return;
+      }
+
+      const devices = await deviceService.getMyDevices(userId);
+
+      const response: ApiResponse = {
+        success: true,
+        message: 'My devices retrieved successfully',
+        data: devices
+      };
+
+      res.status(200).json(response);
+    } catch (error: any) {
+      const response: ApiResponse = {
+        success: false,
+        message: error.message || 'Failed to get my devices',
+        errors: [error.message]
+      };
+
+      res.status(500).json(response);
+    }
+  }
+
   async getDeviceById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;

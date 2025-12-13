@@ -65,7 +65,7 @@ async function main() {
   const xiaomi12 = await prisma.device.upsert({
     where: { codename: 'cupid' },
     update: {},
-    create: { 
+    create: {
       name: 'Xiaomi 12',
       codename: 'cupid',
       image: 'https://via.placeholder.com/300x200',

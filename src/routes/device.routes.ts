@@ -12,6 +12,9 @@ router.get('/search', (req, res) => deviceController.searchDevices(req, res));
 router.get('/codename/:codename', (req, res) => deviceController.getDeviceByCodename(req, res));
 router.get('/:id', (req, res) => deviceController.getDeviceById(req, res));
 
+// Protected routes - Get my devices (authenticated users)
+router.get('/my/devices', authenticate, (req, res) => deviceController.getMyDevices(req, res));
+
 // Protected routes - Create (Admin only)
 router.post('/', authenticate, requireAdmin, (req, res) => deviceController.createDevice(req, res));
 

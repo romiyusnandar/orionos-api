@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AnnouncementController } from '../controllers/announcement.controller';
-import { authenticate, requireAdmin } from '../middleware/auth';
+import { authenticate, requireAdmin, requireAdminOrOwner } from '../middleware/auth';
 
 const router = Router();
 const announcementController = new AnnouncementController();
@@ -11,12 +11,12 @@ router.get('/latest', (req, res) => announcementController.getLatestAnnouncement
 router.get('/device/:codename', (req, res) => announcementController.getAnnouncementsByDevice(req, res));
 router.get('/:id', (req, res) => announcementController.getAnnouncementById(req, res));
 
-// Protected routes (Admin only)
-router.use(authenticate);
-router.use(requireAdmin);
+// Protected routes - Get my announcements (authenticated users)
+router.get('/my/announcements', authenticate, (req, res) => announcementController.getMyAnnouncements(req, res));
 
-router.post('/', (req, res) => announcementController.createAnnouncement(req, res));
-router.put('/:id', (req, res) => announcementController.updateAnnouncement(req, res));
-router.delete('/:id', (req, res) => announcementController.deleteAnnouncement(req, res));
+// Protected routes - Admin or Owner
+router.post('/', authenticate, requireAdminOrOwner, (req, res) => announcementController.createAnnouncement(req, res));
+router.put('/:id', authenticate, requireAdminOrOwner, (req, res) => announcementController.updateAnnouncement(req, res));
+router.delete('/:id', authenticate, requireAdminOrOwner, (req, res) => announcementController.deleteAnnouncement(req, res));
 
 export default router;
