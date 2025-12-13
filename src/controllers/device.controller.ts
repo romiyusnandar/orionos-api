@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { DeviceService } from '../services/device.service';
 import type { ApiResponse, CreateDeviceRequest, UpdateDeviceRequest } from '../types';
+import type { AuthenticatedRequest } from '../middleware/auth';
 
 const deviceService = new DeviceService();
 
@@ -143,7 +144,7 @@ export class DeviceController {
     }
   }
 
-  async updateDevice(req: Request, res: Response): Promise<void> {
+  async updateDevice(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -155,7 +156,7 @@ export class DeviceController {
       }
 
       const data: UpdateDeviceRequest = req.body;
-      const device = await deviceService.updateDevice(id, data);
+      const device = await deviceService.updateDevice(id, data, req.user?.userId, req.user?.role);
 
       const response: ApiResponse = {
         success: true,
@@ -175,7 +176,7 @@ export class DeviceController {
     }
   }
 
-  async deleteDevice(req: Request, res: Response): Promise<void> {
+  async deleteDevice(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       if (!id) {
@@ -186,7 +187,7 @@ export class DeviceController {
         return;
       }
 
-      await deviceService.deleteDevice(id);
+      await deviceService.deleteDevice(id, req.user?.userId, req.user?.role);
 
       const response: ApiResponse = {
         success: true,

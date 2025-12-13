@@ -40,7 +40,9 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
     return;
   }
 
-  if (req.user.role !== 'ADMIN') {
+  // Allow ADMIN, FOUNDER, and CO_FOUNDER
+  const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+  if (!adminRoles.includes(req.user.role)) {
     res.status(403).json({
       success: false,
       message: 'Admin access required'
@@ -48,5 +50,26 @@ export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: Nex
     return;
   }
 
+  next();
+};
+
+// Middleware to allow admin or resource owner
+export const requireAdminOrOwner = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  if (!req.user) {
+    res.status(401).json({
+      success: false,
+      message: 'Authentication required'
+    });
+    return;
+  }
+
+  // Admin roles (ADMIN, FOUNDER, CO_FOUNDER) can access everything
+  const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+  if (adminRoles.includes(req.user.role)) {
+    next();
+    return;
+  }
+
+  // Non-admin users need ownership check (will be done in service layer)
   next();
 };

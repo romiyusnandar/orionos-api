@@ -44,6 +44,7 @@ model User {
 
   // Relations
   maintainedDevices Device[]
+  announcements     Announcement[]
 
   @@map("users")
 }
@@ -62,6 +63,7 @@ model Device {
   maintainerId String
   maintainer   User        @relation(fields: [maintainerId], references: [id])
   builds       BuildRelease[]
+  announcements Announcement[]
 
   @@map("devices")
 }
@@ -77,6 +79,9 @@ model SourceRelease {
   screenshots     Json?    // Array of screenshot URLs
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // Relations
+  announcements Announcement[]
 
   @@map("source_releases")
 }
@@ -105,4 +110,25 @@ model UiSample {
   updatedAt DateTime @updatedAt
 
   @@map("ui_samples")
+}
+
+model Announcement {
+  id                  String   @id @default(cuid())
+  supportGroupLink    String   // Link Support Group Telegram
+  notes               String?  @db.Text // Notes/Description
+  flashGuideLink      String?  // Flash guide link
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  developerId       String
+  developer         User          @relation(fields: [developerId], references: [id])
+  
+  sourceReleaseId   String
+  sourceRelease     SourceRelease @relation(fields: [sourceReleaseId], references: [id])
+  
+  deviceId          String
+  device            Device        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("announcements")
 }

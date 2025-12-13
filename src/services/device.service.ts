@@ -160,7 +160,24 @@ export class DeviceService {
     });
   }
 
-  async updateDevice(id: string, data: UpdateDeviceRequest) {
+  async updateDevice(id: string, data: UpdateDeviceRequest, userId?: string, userRole?: string) {
+    // Check if device exists and get current maintainer
+    const existingDevice = await prisma.device.findUnique({
+      where: { id }
+    });
+
+    if (!existingDevice) {
+      throw new Error('Device not found');
+    }
+
+    // Check ownership for non-admin users
+    const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+    if (userId && !adminRoles.includes(userRole || '')) {
+      if (existingDevice.maintainerId !== userId) {
+        throw new Error('You can only update devices you maintain');
+      }
+    }
+
     // Verify maintainer exists if provided
     if (data.maintainerId) {
       const maintainer = await prisma.user.findUnique({
@@ -188,7 +205,24 @@ export class DeviceService {
     });
   }
 
-  async deleteDevice(id: string) {
+  async deleteDevice(id: string, userId?: string, userRole?: string) {
+    // Check if device exists
+    const existingDevice = await prisma.device.findUnique({
+      where: { id }
+    });
+
+    if (!existingDevice) {
+      throw new Error('Device not found');
+    }
+
+    // Check ownership for non-admin users
+    const adminRoles = ['ADMIN', 'FOUNDER', 'CO_FOUNDER'];
+    if (userId && !adminRoles.includes(userRole || '')) {
+      if (existingDevice.maintainerId !== userId) {
+        throw new Error('You can only delete devices you maintain');
+      }
+    }
+
     return await prisma.device.delete({
       where: { id }
     });

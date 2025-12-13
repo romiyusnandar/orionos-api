@@ -94,3 +94,21 @@ export interface CreateUiSampleRequest {
 export interface UpdateUiSampleRequest {
   url?: string;
 }
+
+export interface CreateAnnouncementRequest {
+  developerId: string;
+  supportGroupLink: string;
+  sourceReleaseId: string;
+  deviceId: string;
+  notes?: string;
+  flashGuideLink?: string;
+}
+
+export interface UpdateAnnouncementRequest {
+  developerId?: string;
+  supportGroupLink?: string;
+  sourceReleaseId?: string;
+  deviceId?: string;
+  notes?: string;
+  flashGuideLink?: string;
+}
